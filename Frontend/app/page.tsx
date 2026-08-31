@@ -1,5 +1,14 @@
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function RootPage() {
-  redirect('/public')
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace('/public')
+  }, [router])
+
+  return null
 }
