@@ -1,19 +1,19 @@
 'use client'
 
+import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
 import {
-  ArrowLeft, MapPin, Phone, User, CreditCard, Banknote,
-  Smartphone, Truck, Store, CheckCircle, ShoppingBag
+  ArrowLeft, CreditCard, Banknote, Smartphone, Truck, Store, CheckCircle, ShoppingBag
 } from 'lucide-react'
-import { useCart } from '@/context/CartContext'
+import { useCart, generateCartItemId } from '@/context/CartContext'
 import type { CheckoutData } from '@/types'
+import { formatPEN, getAssetPath } from '@/lib/utils'
 
 const paymentMethods = [
   { id: 'cash', label: 'Efectivo', icon: <Banknote size={18} />, desc: 'Paga al recibir tu pedido' },
-  { id: 'yape', label: 'Yape', icon: <Smartphone size={18} />, desc: 'Pago con Yape' },
-  { id: 'plin', label: 'Plin', icon: <Smartphone size={18} />, desc: 'Pago con Plin' },
+  { id: 'yape', label: 'Yape', icon: <Smartphone size={18} />, desc: 'Pago con Yape (51993186933)' },
+  { id: 'plin', label: 'Plin', icon: <Smartphone size={18} />, desc: 'Pago con Plin (51993186933)' },
   { id: 'card', label: 'Tarjeta', icon: <CreditCard size={18} />, desc: 'Próximamente' },
 ] as const
 
@@ -30,9 +30,47 @@ export default function CheckoutPage() {
 
   const canSubmit = form.name && form.phone && (form.deliveryMethod === 'pickup' || form.address)
 
+  const finalTotal = form.deliveryMethod === 'pickup' ? state.subtotal : total
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit || state.items.length === 0) return
+
+    // Construct WhatsApp message
+    let message = `🛒 *NUEVO PEDIDO DELIVERYGOOD*\n\n`
+    message += `👤 *Cliente:* ${form.name}\n`
+    message += `📱 *Teléfono:* ${form.phone}\n`
+    message += `📍 *Método:* ${form.deliveryMethod === 'delivery' ? 'Delivery a domicilio' : 'Recojo en tienda'}\n`
+    if (form.deliveryMethod === 'delivery') {
+      message += `🏠 *Dirección:* ${form.address}\n`
+      if (form.reference) message += `📍 *Ref:* ${form.reference}\n`
+    }
+    message += `💳 *Pago:* ${form.paymentMethod.toUpperCase()}\n`
+    if (state.businessName) message += `🏪 *Negocio:* ${state.businessName}\n`
+    message += `\n📋 *DETALLE DEL PEDIDO:*\n`
+
+    state.items.forEach(item => {
+      const itemTotal = item.unitPriceWithExtras * item.quantity
+      message += `• ${item.product.name} x${item.quantity} - ${formatPEN(itemTotal)}\n`
+      if (item.selectedOptions && item.selectedOptions.length > 0) {
+        item.selectedOptions.forEach(opt => {
+          message += `   └ ${opt.groupName}: ${opt.optionName}\n`
+        })
+      }
+      if (item.observations) {
+        message += `   └ Nota: "${item.observations}"\n`
+      }
+    })
+
+    message += `\n💰 *Subtotal:* ${formatPEN(state.subtotal)}\n`
+    if (form.deliveryMethod === 'delivery') {
+      message += `🚚 *Delivery:* ${formatPEN(deliveryFee)}\n`
+    }
+    message += `TOTAL:* ${formatPEN(finalTotal)}\n`
+
+    const waUrl = `https://wa.me/51993186933?text=${encodeURIComponent(message)}`
+    window.open(waUrl, '_blank')
+
     setConfirmed(true)
     clearCart()
   }
@@ -52,12 +90,12 @@ export default function CheckoutPage() {
             ¡Pedido <span style={{ color: 'var(--brand-primary)' }}>confirmado</span>!
           </h1>
           <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            Tu pedido ha sido recibido exitosamente. Te contactaremos por WhatsApp para coordinar la entrega.
+            Tu pedido ha sido generado exitosamente. Se ha abierto WhatsApp para confirmar el despacho con la tienda.
           </p>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            Tiempo estimado: 30-45 minutos
+            Tiempo estimado de llegada: 30-45 minutos
           </p>
-          <Link href="/public" className="btn btn-primary btn-lg" style={{ marginTop: 16 }}>
+          <Link href="/" className="btn btn-primary btn-lg" style={{ marginTop: 16 }}>
             <ShoppingBag size={18} /> Seguir comprando
           </Link>
         </div>
@@ -73,7 +111,7 @@ export default function CheckoutPage() {
           Tu carrito está vacío
         </h1>
         <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Agrega productos para continuar con el checkout.</p>
-        <Link href="/public" className="btn btn-primary">← Ir al marketplace</Link>
+        <Link href="/" className="btn btn-primary">← Ir al marketplace</Link>
       </div>
     )
   }
@@ -82,7 +120,7 @@ export default function CheckoutPage() {
     <div className="container" style={{ padding: '40px 0 80px' }}>
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
-        <Link href="/public" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: 12 }}>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: 12 }}>
           <ArrowLeft size={16} /> Volver al marketplace
         </Link>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 900, textTransform: 'uppercase' }}>
@@ -197,42 +235,57 @@ export default function CheckoutPage() {
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
-                {state.items.map(item => (
-                  <div key={item.product.id} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <div style={{
-                      width: 48, height: 48, borderRadius: 'var(--radius-md)',
-                      background: 'var(--bg-surface-3)', overflow: 'hidden',
-                      position: 'relative', flexShrink: 0,
-                    }}>
-                      <Image src={item.product.image} alt={item.product.name} fill style={{ objectFit: 'contain', padding: 4 }} />
+                {state.items.map((item, idx) => {
+                  const itemKey = generateCartItemId(item.product.id, item.selectedOptions, item.observations)
+                  const itemTotal = item.unitPriceWithExtras * item.quantity
+                  const imgSrc = getAssetPath(item.product.image)
+
+                  return (
+                    <div key={itemKey || idx} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                      <div style={{
+                        width: 48, height: 48, borderRadius: 'var(--radius-md)',
+                        background: 'var(--bg-surface-3)', overflow: 'hidden',
+                        position: 'relative', flexShrink: 0,
+                      }}>
+                        <Image src={imgSrc} alt={item.product.name} fill style={{ objectFit: 'contain', padding: 4 }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                          {item.product.name} <span style={{ color: 'var(--brand-primary)' }}>x{item.quantity}</span>
+                        </p>
+                        {item.selectedOptions && item.selectedOptions.length > 0 && (
+                          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                            {item.selectedOptions.map(o => o.optionName).join(', ')}
+                          </p>
+                        )}
+                        {item.observations && (
+                          <p style={{ fontSize: '0.7rem', fontStyle: 'italic', color: 'var(--text-muted)' }}>
+                            &quot;{item.observations}&quot;
+                          </p>
+                        )}
+                      </div>
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+                        {formatPEN(itemTotal)}
+                      </span>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {item.product.name}
-                      </p>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>x{item.quantity}</p>
-                    </div>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
-                      S/ {(item.product.price * item.quantity).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
               <div className="divider" style={{ marginBottom: 12 }} />
 
               <div className="cart-summary-row">
                 <span>Subtotal</span>
-                <span>S/ {state.subtotal.toFixed(2)}</span>
+                <span>{formatPEN(state.subtotal)}</span>
               </div>
               <div className="cart-summary-row">
                 <span>Delivery</span>
-                <span>{form.deliveryMethod === 'pickup' ? 'Gratis' : `S/ ${deliveryFee.toFixed(2)}`}</span>
+                <span>{form.deliveryMethod === 'pickup' ? 'Gratis' : formatPEN(deliveryFee)}</span>
               </div>
               <div className="cart-summary-total">
                 <span>Total</span>
                 <span style={{ color: 'var(--brand-primary)' }}>
-                  S/ {form.deliveryMethod === 'pickup' ? state.subtotal.toFixed(2) : total.toFixed(2)}
+                  {formatPEN(finalTotal)}
                 </span>
               </div>
 
@@ -243,11 +296,11 @@ export default function CheckoutPage() {
                 disabled={!canSubmit}
               >
                 <CheckCircle size={18} />
-                Confirmar pedido
+                Confirmar por WhatsApp
               </button>
 
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: 12, lineHeight: 1.5 }}>
-                Al confirmar, recibirás un mensaje de WhatsApp con los detalles de tu pedido.
+                Al confirmar, se abrirá WhatsApp con el desglose exacto de tu pedido para el envío.
               </p>
             </div>
           </div>

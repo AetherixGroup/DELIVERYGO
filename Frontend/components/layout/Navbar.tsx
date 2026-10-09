@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext'
 import { useFavorites } from '@/context/FavoritesContext'
 import { products } from '@/lib/data/products'
 import type { Product } from '@/types'
+import { formatPEN, getAssetPath } from '@/lib/utils'
 
 export default function Navbar() {
   const { state: cart, toggleCart } = useCart()
@@ -26,12 +27,15 @@ export default function Navbar() {
       return
     }
     const q = query.toLowerCase()
-    const found = products.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.businessName.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      p.tags.some(t => t.toLowerCase().includes(q))
-    ).slice(0, 6)
+    const found = products
+      .filter(
+        p =>
+          p.name.toLowerCase().includes(q) ||
+          p.businessName.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.tags.some(t => t.toLowerCase().includes(q))
+      )
+      .slice(0, 6)
     setResults(found)
     setShowResults(true)
   }, [query])
@@ -54,22 +58,24 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="navbar-logo" aria-label="DeliveryGood - Inicio">
             <Image
-              src="/images/WhatsApp Image 2026-08-04 at 17.30.57.jpeg"
+              src={getAssetPath('/images/logo de preaft.jpeg')}
               alt="DeliveryGood"
               width={44}
               height={44}
               style={{ borderRadius: 8, objectFit: 'contain' }}
               priority
             />
-            <span style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 900,
-              fontSize: '1.2rem',
-              letterSpacing: '-0.02em',
-              display: 'flex',
-              flexDirection: 'column',
-              lineHeight: 1,
-            }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontWeight: 900,
+                fontSize: '1.2rem',
+                letterSpacing: '-0.02em',
+                display: 'flex',
+                flexDirection: 'column',
+                lineHeight: 1,
+              }}
+            >
               <span style={{ color: 'var(--text-primary)' }}>DELIVERY</span>
               <span style={{ color: 'var(--brand-primary)' }}>GOOD</span>
             </span>
@@ -103,6 +109,7 @@ export default function Navbar() {
                 style={{ paddingLeft: 40 }}
                 aria-label="Buscar productos"
                 aria-expanded={showResults}
+                aria-controls="navbar-search-results"
                 role="combobox"
                 aria-autocomplete="list"
               />
@@ -110,23 +117,29 @@ export default function Navbar() {
 
             {/* Search Results Dropdown */}
             {showResults && results.length > 0 && (
-              <div style={{
-                position: 'absolute',
-                top: '110%',
-                left: 0,
-                right: 0,
-                background: 'var(--bg-surface-4)',
-                border: '1px solid var(--border-medium)',
-                borderRadius: 'var(--radius-lg)',
-                overflow: 'hidden',
-                zIndex: 200,
-                boxShadow: 'var(--shadow-lg)',
-              }}>
+              <div
+                id="navbar-search-results"
+                style={{
+                  position: 'absolute',
+                  top: '110%',
+                  left: 0,
+                  right: 0,
+                  background: 'var(--bg-surface-4)',
+                  border: '1px solid var(--border-medium)',
+                  borderRadius: 'var(--radius-lg)',
+                  overflow: 'hidden',
+                  zIndex: 200,
+                  boxShadow: 'var(--shadow-lg)',
+                }}
+              >
                 {results.map(p => (
                   <Link
                     href={`/businesses/${p.businessSlug}`}
                     key={p.id}
-                    onClick={() => { setShowResults(false); setQuery('') }}
+                    onClick={() => {
+                      setShowResults(false)
+                      setQuery('')
+                    }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -137,20 +150,23 @@ export default function Navbar() {
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface-3)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
-                    <div style={{
-                      width: 40, height: 40,
-                      borderRadius: 8,
-                      background: 'var(--bg-surface-3)',
-                      position: 'relative',
-                      flexShrink: 0,
-                      overflow: 'hidden',
-                    }}>
-                      <Image src={p.image} alt={p.name} fill style={{ objectFit: 'contain', padding: 4 }} />
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 8,
+                        background: 'var(--bg-surface-3)',
+                        position: 'relative',
+                        flexShrink: 0,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Image src={getAssetPath(p.image)} alt={p.name} fill style={{ objectFit: 'contain', padding: 4 }} />
                     </div>
                     <div>
                       <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>{p.name}</p>
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        {p.businessName} · S/ {p.price.toFixed(2)}
+                        {p.businessName} · {formatPEN(p.price)}
                       </p>
                     </div>
                   </Link>
@@ -162,23 +178,35 @@ export default function Navbar() {
           {/* Actions */}
           <div className="navbar-actions">
             {/* Favorites */}
-            <button
+            <Link
+              href="/"
               className="btn btn-ghost btn-icon"
               aria-label={`Favoritos (${favCount})`}
               style={{ position: 'relative', display: 'flex' }}
             >
               <Heart size={20} />
               {favCount > 0 && (
-                <span style={{
-                  position: 'absolute', top: 2, right: 2,
-                  width: 14, height: 14, borderRadius: '50%',
-                  background: 'var(--error)', fontSize: '0.6rem',
-                  fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 2,
+                    right: 2,
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50%',
+                    background: 'var(--error)',
+                    fontSize: '0.6rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                  }}
+                >
                   {favCount}
                 </span>
               )}
-            </button>
+            </Link>
 
             {/* Cart */}
             <button
@@ -191,7 +219,7 @@ export default function Navbar() {
               {cart.totalItems > 0 ? (
                 <>
                   <span className="cart-count">{cart.totalItems}</span>
-                  <span>S/ {cart.subtotal.toFixed(2)}</span>
+                  <span>{formatPEN(cart.subtotal)}</span>
                 </>
               ) : (
                 <span>Carrito</span>
@@ -232,6 +260,8 @@ export default function Navbar() {
               type="search"
               className="input"
               placeholder="Busca productos..."
+              value={query}
+              onChange={e => setQuery(e.target.value)}
               style={{ paddingLeft: 40 }}
               aria-label="Buscar en móvil"
             />
@@ -241,12 +271,11 @@ export default function Navbar() {
         <nav style={{ padding: '16px 0', flex: 1 }}>
           {[
             { href: '/', label: '🏠 Inicio' },
-            { href: '/', label: '🍕 Pizzerías' },
-            { href: '/', label: '🥃 Licorería' },
-            { href: '/', label: '🐟 Cevicherías' },
-            { href: '/', label: '🍽️ Restaurantes' },
-            { href: '/', label: '❤️ Favoritos' },
-            { href: '/checkout', label: '📦 Mis pedidos' },
+            { href: '/businesses/pizzeria-dlu', label: '🍕 Pizzerías' },
+            { href: '/businesses/licoreria-preaft', label: '🥃 Licorería' },
+            { href: '/businesses/cevicheria-el-muelle', label: '🐟 Cevicherías' },
+            { href: '/businesses/don-brasa', label: '🔥 Parrillas' },
+            { href: '/cart', label: '🛒 Mi pedido' },
           ].map(item => (
             <Link
               key={item.href + item.label}
@@ -267,7 +296,14 @@ export default function Navbar() {
         </nav>
 
         <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-medium)' }}>
-          <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => { toggleCart(); setMobileOpen(false) }}>
+          <button
+            className="btn btn-primary"
+            style={{ width: '100%' }}
+            onClick={() => {
+              toggleCart()
+              setMobileOpen(false)
+            }}
+          >
             <ShoppingCart size={18} />
             Ver carrito {cart.totalItems > 0 && `(${cart.totalItems})`}
           </button>

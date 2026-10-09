@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Search, X } from 'lucide-react'
 import { products } from '@/lib/data/products'
 import type { Product } from '@/types'
+import { formatPEN } from '@/lib/utils'
 
 interface Props {
   onResults?: (results: Product[]) => void
@@ -64,6 +65,7 @@ export default function SearchBar({ onResults, placeholder = 'Busca pizzas, lico
         onFocus={() => results.length > 0 && setShowResults(true)}
         aria-label="Buscar productos"
         aria-expanded={showResults}
+        aria-controls="searchbar-results"
         role="combobox"
         aria-autocomplete="list"
       />
@@ -83,21 +85,26 @@ export default function SearchBar({ onResults, placeholder = 'Busca pizzas, lico
       )}
 
       {showResults && results.length > 0 && (
-        <div style={{
-          position: 'absolute', top: '110%', left: 0, right: 0,
-          background: 'var(--bg-surface-4)',
-          border: '1px solid var(--border-medium)',
-          borderRadius: 'var(--radius-lg)',
-          overflow: 'hidden',
-          zIndex: 200,
-          boxShadow: 'var(--shadow-lg)',
-          maxHeight: 400,
-          overflowY: 'auto',
-        }} role="listbox">
+        <div
+          id="searchbar-results"
+          style={{
+            position: 'absolute', top: '110%', left: 0, right: 0,
+            background: 'var(--bg-surface-4)',
+            border: '1px solid var(--border-medium)',
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden',
+            zIndex: 200,
+            boxShadow: 'var(--shadow-lg)',
+            maxHeight: 400,
+            overflowY: 'auto',
+          }}
+          role="listbox"
+        >
           {results.map(p => (
             <div
               key={p.id}
               role="option"
+              aria-selected={false}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
                 padding: '10px 16px',
@@ -118,7 +125,7 @@ export default function SearchBar({ onResults, placeholder = 'Busca pizzas, lico
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>{p.name}</p>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  {p.businessName} · S/ {p.price.toFixed(2)}
+                  {p.businessName} · {formatPEN(p.price)}
                 </p>
               </div>
             </div>

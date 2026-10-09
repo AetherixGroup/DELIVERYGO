@@ -1,6 +1,17 @@
 // ============================================================
-// DELIVERYGO — Types
+// DELIVERYGO — Core Types
 // ============================================================
+
+export type BusinessCategory =
+  | 'pizzeria'
+  | 'licoreria'
+  | 'cevicheria'
+  | 'restaurant'
+  | 'fastfood'
+  | 'cafeteria'
+  | 'parrilla'
+  | 'sushi'
+  | 'pollo'
 
 export interface Business {
   id: string
@@ -24,16 +35,20 @@ export interface Business {
   featured: boolean
 }
 
-export type BusinessCategory =
-  | 'pizzeria'
-  | 'licoreria'
-  | 'cevicheria'
-  | 'restaurant'
-  | 'fastfood'
-  | 'cafeteria'
-  | 'parrilla'
-  | 'sushi'
-  | 'pollo'
+export interface ProductOptionValue {
+  id: string
+  name: string
+  price: number // Extra price in PEN (0 if included)
+}
+
+export interface ProductOptionGroup {
+  id: string
+  name: string // e.g. "Tamaño", "Sabor de Pizza", "Adicionales"
+  required: boolean
+  minSelections?: number
+  maxSelections?: number
+  values: ProductOptionValue[]
+}
 
 export interface Product {
   id: string
@@ -52,6 +67,29 @@ export interface Product {
   isOffer: boolean
   ml?: string
   tags: string[]
+  optionGroups?: ProductOptionGroup[]
+}
+
+export interface SelectedOption {
+  groupId: string
+  groupName: string
+  optionId: string
+  optionName: string
+  price: number
+}
+
+export interface CartItem {
+  product: Product
+  quantity: number
+  selectedOptions?: SelectedOption[]
+  observations?: string
+  unitPriceWithExtras: number
+}
+
+export interface Cart {
+  items: CartItem[]
+  businessId: string | null
+  businessName: string | null
 }
 
 export interface Category {
@@ -61,17 +99,6 @@ export interface Category {
   icon: string
   count: number
   businessCategory?: BusinessCategory
-}
-
-export interface CartItem {
-  product: Product
-  quantity: number
-}
-
-export interface Cart {
-  items: CartItem[]
-  businessId: string | null
-  businessName: string | null
 }
 
 export interface FavoritesState {

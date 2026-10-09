@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft, ShoppingBag, Trash2 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import CartItem from '@/components/marketplace/CartItem'
+import { formatPEN } from '@/lib/utils'
 
 export default function CartPage() {
   const { state, increaseQty, decreaseQty, removeItem, clearCart, total, deliveryFee } = useCart()
@@ -31,7 +32,7 @@ export default function CartPage() {
         <p style={{ color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
           Agrega productos de tus negocios favoritos para comenzar tu pedido.
         </p>
-        <Link href="/public" className="btn btn-primary btn-lg">
+        <Link href="/" className="btn btn-primary btn-lg">
           Explorar negocios
         </Link>
       </div>
@@ -43,7 +44,7 @@ export default function CartPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <Link href="/public" style={{
+          <Link href="/" style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: 8,
           }}>
@@ -90,9 +91,9 @@ export default function CartPage() {
           )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {state.items.map(item => (
+            {state.items.map((item, idx) => (
               <CartItem
-                key={item.product.id}
+                key={`${item.product.id}_${idx}`}
                 item={item}
                 onIncrease={increaseQty}
                 onDecrease={decreaseQty}
@@ -108,12 +109,12 @@ export default function CartPage() {
             <h2 className="checkout-card-title">Resumen del pedido</h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-              {state.items.map(item => (
-                <div key={item.product.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+              {state.items.map((item, idx) => (
+                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>
                     {item.product.name} x{item.quantity}
                   </span>
-                  <span style={{ fontWeight: 600 }}>S/ {(item.product.price * item.quantity).toFixed(2)}</span>
+                  <span style={{ fontWeight: 600 }}>{formatPEN(item.unitPriceWithExtras * item.quantity)}</span>
                 </div>
               ))}
             </div>
@@ -122,15 +123,15 @@ export default function CartPage() {
 
             <div className="cart-summary-row">
               <span>Subtotal ({state.totalItems} productos)</span>
-              <span>S/ {state.subtotal.toFixed(2)}</span>
+              <span>{formatPEN(state.subtotal)}</span>
             </div>
             <div className="cart-summary-row">
               <span>Delivery</span>
-              <span>S/ {deliveryFee.toFixed(2)}</span>
+              <span>{formatPEN(deliveryFee)}</span>
             </div>
             <div className="cart-summary-total">
               <span>Total</span>
-              <span style={{ color: 'var(--brand-primary)' }}>S/ {total.toFixed(2)}</span>
+              <span style={{ color: 'var(--brand-primary)' }}>{formatPEN(total)}</span>
             </div>
 
             <Link
@@ -142,7 +143,7 @@ export default function CartPage() {
             </Link>
 
             <Link
-              href="/public"
+              href="/"
               style={{
                 display: 'block', textAlign: 'center', marginTop: 12,
                 fontSize: '0.85rem', color: 'var(--text-muted)',

@@ -23,7 +23,7 @@ export default function Footer() {
             </p>
             <div style={{ display: 'flex', gap: 12 }}>
               <a
-                href="https://wa.me/51997760161"
+                href="https://wa.me/51993186933"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-brand-outline btn-sm"
@@ -37,11 +37,11 @@ export default function Footer() {
           <div>
             <h4 className="footer-col-title">Categorías</h4>
             <div className="footer-links">
-              <Link href="/public" className="footer-link">🍕 Pizzerías</Link>
-              <Link href="/public" className="footer-link">🥃 Licorería</Link>
-              <Link href="/public" className="footer-link">🐟 Cevicherías</Link>
-              <Link href="/public" className="footer-link">🔥 Parrillas</Link>
-              <Link href="/public" className="footer-link">🍔 Fast Food</Link>
+              <Link href="/" className="footer-link">🍕 Pizzerías</Link>
+              <Link href="/" className="footer-link">🥃 Licorería</Link>
+              <Link href="/" className="footer-link">🐟 Cevicherías</Link>
+              <Link href="/" className="footer-link">🔥 Parrillas</Link>
+              <Link href="/" className="footer-link">🍔 Fast Food</Link>
             </div>
           </div>
 
@@ -61,7 +61,7 @@ export default function Footer() {
             <h4 className="footer-col-title">Contacto</h4>
             <div className="footer-links">
               <span className="footer-link" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Phone size={14} /> 997 760 161
+                <Phone size={14} /> 993 186 933
               </span>
               <span className="footer-link" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <MapPin size={14} /> Santa Clara, Lima
@@ -79,8 +79,8 @@ export default function Footer() {
             © {new Date().getFullYear()} DeliveryGood. Todos los derechos reservados.
           </p>
           <div style={{ display: 'flex', gap: 16 }}>
-            <Link href="/public" className="footer-link">Términos</Link>
-            <Link href="/public" className="footer-link">Privacidad</Link>
+            <Link href="/" className="footer-link">Términos</Link>
+            <Link href="/" className="footer-link">Privacidad</Link>
           </div>
         </div>
       </div>

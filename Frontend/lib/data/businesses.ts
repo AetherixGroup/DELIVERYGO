@@ -1,26 +1,22 @@
 import type { Business } from '@/types'
 
 export const businesses: Business[] = [
-  // ─── PIZZERÍA D'LU ───────────────────────────────────────
+  // ─── PIZZERÍA D'LU ──────────────────────────────────────────
   {
     id: 'pizzeria-dlu',
     slug: 'pizzeria-dlu',
-    name: "Pizzería D'Lu",
+    name: "Pizzeria D'Lu",
     tagline: 'Las mejores pizzas de Santa Clara',
     description:
-      "Pizzería artesanal con más de 5 años en Santa Clara. Pizzas familiares, medianas y personales al horno. Ingredientes frescos, masa artesanal y la famosa salsa mediterránea que nos distingue.",
+      'Pizzería artesanal con más de 5 años en Santa Clara. Pizzas familiares, medianas y personales al horno. Ingredientes frescos, masa artesanal y la famosa salsa mediterránea que nos distingue.',
     category: 'pizzeria',
-    logo: '/images/183563604_293409762435262_7570986231920262209_n.jpg',
-    coverImage: '/images/470231075_1119431166499780_4411629434527614373_n.jpg',
+    logo: '/images/logo de pizzeria DLU.png',
+    coverImage: '/images/2 pizzas familiares americana y hawaina.jpeg',
     bannerImages: [
-      '/images/183563604_293409762435262_7570986231920262209_n.jpg',
-      '/images/470139873_1118609176581979_8690390692436785858_n.jpg',
-      '/images/470182389_1118609179915312_1010923946742541858_n.jpg',
-      '/images/470231075_1119431166499780_4411629434527614373_n.jpg',
-      '/images/471562398_1128997282209835_7480365408600104321_n.jpg',
-      '/images/471645425_1128997305543166_4658985869999387498_n.jpg',
-      '/images/471750769_1128997342209829_7595170936036953174_n.jpg',
-      '/images/472543157_1133955221714041_1514971618640253629_n.jpg',
+      '/images/1 pizza familiar - 1 pizza mediana (americana,hawaina).jpeg',
+      '/images/2 pizzas familiares clasicas(americana,hawaina).jpeg',
+      '/images/2 pizzas medianas (americana,hawaina).jpeg',
+      '/images/2 pizzas medianas clasicas ( americana,hawaiana).jpeg',
     ],
     isOpen: true,
     rating: 4.8,
@@ -34,7 +30,7 @@ export const businesses: Business[] = [
     featured: true,
   },
 
-  // ─── LICORERÍA PREAFT ────────────────────────────────────
+  // ─── LICORERÍA PREAFT ───────────────────────────────────────
   {
     id: 'licoreria-preaft',
     slug: 'licoreria-preaft',
@@ -43,7 +39,7 @@ export const businesses: Business[] = [
     description:
       'La mejor selección de licores, cervezas y bebidas premium. Whiskies, rones, vodkas, pisco y más. Entrega rápida a domicilio en toda la zona.',
     category: 'licoreria',
-    logo: '/images/WhatsApp Image 2026-08-04 at 17.30.57.jpeg',
+    logo: '/images/logo de preaft.jpeg',
     coverImage: '/images/JACK DANIELS  750 ML.png',
     bannerImages: [
       '/images/JACK DANIELS  750 ML.png',
@@ -62,7 +58,7 @@ export const businesses: Business[] = [
     featured: true,
   },
 
-  // ─── CEVICHERÍA EL MUELLE ────────────────────────────────
+  // ─── CEVICHERÍA EL MUELLE ───────────────────────────────────
   {
     id: 'cevicheria-el-muelle',
     slug: 'cevicheria-el-muelle',
@@ -71,9 +67,9 @@ export const businesses: Business[] = [
     description:
       'Auténtica cevichería peruana con los mejores ingredientes frescos del mar. Ceviche clásico, leche de tigre, arroz con mariscos, chicharrón de calamar y mucho más.',
     category: 'cevicheria',
-    logo: '/images/cevicheria-banner.jpg',
+    logo: '/images/ceviche-clasico.jpg',
     coverImage: '/images/cevicheria-banner.jpg',
-    bannerImages: ['/images/cevicheria-banner.jpg'],
+    bannerImages: ['/images/cevicheria-banner.jpg', '/images/ceviche-clasico.jpg'],
     isOpen: true,
     rating: 4.7,
     reviewCount: 256,
@@ -86,7 +82,7 @@ export const businesses: Business[] = [
     featured: true,
   },
 
-  // ─── DON BRASA ───────────────────────────────────────────
+  // ─── DON BRASA ──────────────────────────────────────────────
   {
     id: 'don-brasa',
     slug: 'don-brasa',
@@ -95,9 +91,9 @@ export const businesses: Business[] = [
     description:
       'Restaurante especializado en pollo a la brasa, parrillas y anticuchos. Leña y carbón natural para el mejor sabor. Incluye ensalada, papa y salsas caseras.',
     category: 'parrilla',
-    logo: '/images/ceviche-clasico.jpg',
-    coverImage: '/images/ceviche-clasico.jpg',
-    bannerImages: ['/images/ceviche-clasico.jpg'],
+    logo: '',
+    coverImage: '/images/WhatsApp Image 2026-08-04 at 17.30.57.jpeg',
+    bannerImages: ['/images/WhatsApp Image 2026-08-04 at 17.30.57.jpeg'],
     isOpen: false,
     rating: 4.5,
     reviewCount: 143,

@@ -1,23 +1,28 @@
 'use client'
 
+import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
-import { Star, Clock, Truck, MapPin, Phone, ArrowLeft, ChevronRight } from 'lucide-react'
+import { Star, Clock, Truck, MapPin, Phone, Store } from 'lucide-react'
 import ProductCard from '@/components/marketplace/ProductCard'
 import { businesses } from '@/lib/data/businesses'
 import { products } from '@/lib/data/products'
+import { formatPEN, getAssetPath } from '@/lib/utils'
 
 interface BusinessDetailClientProps {
   slug: string
 }
 
-export default function BusinessDetailClient({ slug }: BusinessDetailClientProps) {
+export default function BusinessDetailClient({
+  slug,
+}: BusinessDetailClientProps) {
   const business = businesses.find(b => b.slug === slug)
   const bizProducts = products.filter(p => p.businessSlug === slug)
 
   const productCategories = ['Todos', ...Array.from(new Set(bizProducts.map(p => p.category)))]
   const [activeCat, setActiveCat] = useState('Todos')
+  const [logoError, setLogoError] = useState(false)
+  const [coverError, setCoverError] = useState(false)
 
   const filtered = activeCat === 'Todos'
     ? bizProducts
@@ -31,35 +36,74 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
           Negocio no encontrado
         </h1>
         <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>El negocio que buscas no existe o fue removido.</p>
-        <Link href="/public" className="btn btn-primary">← Volver al inicio</Link>
+        <Link href="/" className="btn btn-primary">← Volver al inicio</Link>
       </div>
     )
   }
+
+  const coverSrc = getAssetPath(business.coverImage)
+  const logoSrc = getAssetPath(business.logo)
 
   return (
     <>
       {/* Cover */}
       <div className="business-header">
-        <div className="business-cover">
-          <Image
-            src={business.coverImage}
-            alt={business.name}
-            fill
-            style={{ objectFit: 'cover' }}
-            priority
-          />
+        <div className="business-cover" style={{ position: 'relative', overflow: 'hidden' }}>
+          {coverError ? (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'var(--bg-surface-3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-muted)',
+              }}
+            >
+              <Store size={48} />
+            </div>
+          ) : (
+            <Image
+              src={coverSrc}
+              alt={business.name}
+              fill
+              style={{ objectFit: 'cover' }}
+              priority
+              onError={() => setCoverError(true)}
+            />
+          )}
           <div className="business-cover-overlay" />
         </div>
 
         <div className="container">
           <div className="business-info-bar">
-            <div className="business-logo-large">
-              <Image
-                src={business.logo}
-                alt={`Logo ${business.name}`}
-                fill
-                style={{ objectFit: 'cover' }}
-              />
+            <div className="business-logo-large" style={{ position: 'relative', overflow: 'hidden' }}>
+              {logoError ? (
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'var(--bg-surface-2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--brand-primary)',
+                    fontWeight: 900,
+                    fontSize: '1.5rem',
+                  }}
+                >
+                  {business.name.substring(0, 2).toUpperCase()}
+                </div>
+              ) : (
+                <Image
+                  src={logoSrc}
+                  alt={`Logo ${business.name}`}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  onError={() => setLogoError(true)}
+                />
+              )}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4, flexWrap: 'wrap' }}>
@@ -88,7 +132,7 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
                   <Clock size={14} /> {business.deliveryTime}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Truck size={14} /> Delivery S/ {business.deliveryFee.toFixed(2)}
+                  <Truck size={14} /> Delivery {business.deliveryFee === 0 ? 'Gratis' : formatPEN(business.deliveryFee)}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <MapPin size={14} /> {business.address}
@@ -110,7 +154,7 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
               <span key={t} className="badge badge-neutral">{t}</span>
             ))}
             <span className="badge badge-brand">
-              Mín. S/ {business.minimumOrder}
+              Mín. {formatPEN(business.minimumOrder)}
             </span>
           </div>
         </div>
@@ -177,7 +221,7 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
             <div>
               <h3 style={{ fontWeight: 700, marginBottom: 4 }}>¿Necesitas ayuda con tu pedido?</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                Contacta directamente con {business.name}
+                Contacta directamente con {business.name} ({business.phone})
               </p>
             </div>
             <a

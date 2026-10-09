@@ -1,17 +1,24 @@
 'use client'
 
+import React, { useState } from 'react'
 import Image from 'next/image'
-import { X, ShoppingCart, Plus, Minus, Trash2, ChevronRight } from 'lucide-react'
-import { useCart } from '@/context/CartContext'
+import { X, ShoppingCart, Plus, Minus, Trash2, ChevronRight, Utensils } from 'lucide-react'
+import { useCart, generateCartItemId } from '@/context/CartContext'
 import { useRouter } from 'next/navigation'
+import { formatPEN, getAssetPath } from '@/lib/utils'
 
 export default function CartDrawer() {
-  const { state, closeCart, increaseQty, decreaseQty, removeItem, total, deliveryFee } = useCart()
+  const { state, closeCart, increaseQty, decreaseQty, total, deliveryFee } = useCart()
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
   const router = useRouter()
 
   const handleCheckout = () => {
     closeCart()
     router.push('/checkout')
+  }
+
+  const handleImgError = (key: string) => {
+    setFailedImages(prev => ({ ...prev, [key]: true }))
   }
 
   return (
@@ -68,50 +75,90 @@ export default function CartDrawer() {
             </div>
           ) : (
             <div>
-              {state.items.map((item, i) => (
-                <div key={item.product.id} className="cart-item animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
-                  <div style={{
-                    width: 64, height: 64, borderRadius: 'var(--radius-md)',
-                    background: 'var(--bg-surface-3)', flexShrink: 0, overflow: 'hidden',
-                    position: 'relative'
-                  }}>
-                    <Image
-                      src={item.product.image}
-                      alt={item.product.name}
-                      fill
-                      style={{ objectFit: 'contain', padding: 4 }}
-                    />
-                  </div>
+              {state.items.map((item, i) => {
+                const itemKey = generateCartItemId(item.product.id, item.selectedOptions, item.observations)
+                const imgSrc = getAssetPath(item.product.image)
+                const hasError = failedImages[itemKey]
 
-                  <div className="cart-item-info">
-                    <p className="cart-item-name">{item.product.name}</p>
-                    <p className="cart-item-seller">{item.product.businessName}</p>
+                return (
+                  <div key={itemKey} className="cart-item animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
+                    <div
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 'var(--radius-md)',
+                        background: 'var(--bg-surface-3)',
+                        flexShrink: 0,
+                        overflow: 'hidden',
+                        position: 'relative',
+                      }}
+                    >
+                      {hasError ? (
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'var(--text-muted)',
+                          }}
+                        >
+                          <Utensils size={18} />
+                        </div>
+                      ) : (
+                        <Image
+                          src={imgSrc}
+                          alt={item.product.name}
+                          fill
+                          style={{ objectFit: 'contain', padding: 4 }}
+                          onError={() => handleImgError(itemKey)}
+                        />
+                      )}
+                    </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div className="cart-item-controls">
-                        <button
-                          className="qty-btn"
-                          onClick={() => decreaseQty(item.product.id)}
-                          aria-label="Disminuir cantidad"
-                        >
-                          {item.quantity === 1 ? <Trash2 size={12} /> : <Minus size={12} />}
-                        </button>
-                        <span className="qty-display">{item.quantity}</span>
-                        <button
-                          className="qty-btn"
-                          onClick={() => increaseQty(item.product.id)}
-                          aria-label="Aumentar cantidad"
-                        >
-                          <Plus size={12} />
-                        </button>
+                    <div className="cart-item-info">
+                      <p className="cart-item-name">{item.product.name}</p>
+                      <p className="cart-item-seller">{item.product.businessName}</p>
+
+                      {item.selectedOptions && item.selectedOptions.length > 0 && (
+                        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '2px 0' }}>
+                          {item.selectedOptions.map(o => o.optionName).join(', ')}
+                        </p>
+                      )}
+
+                      {item.observations && (
+                        <p style={{ fontSize: '0.7rem', fontStyle: 'italic', color: 'var(--text-muted)' }}>
+                          &quot;{item.observations}&quot;
+                        </p>
+                      )}
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+                        <div className="cart-item-controls">
+                          <button
+                            className="qty-btn"
+                            onClick={() => decreaseQty(itemKey)}
+                            aria-label="Disminuir cantidad"
+                          >
+                            {item.quantity === 1 ? <Trash2 size={12} /> : <Minus size={12} />}
+                          </button>
+                          <span className="qty-display">{item.quantity}</span>
+                          <button
+                            className="qty-btn"
+                            onClick={() => increaseQty(itemKey)}
+                            aria-label="Aumentar cantidad"
+                          >
+                            <Plus size={12} />
+                          </button>
+                        </div>
+                        <span className="cart-item-price">
+                          {formatPEN(item.unitPriceWithExtras * item.quantity)}
+                        </span>
                       </div>
-                      <span className="cart-item-price">
-                        S/ {(item.product.price * item.quantity).toFixed(2)}
-                      </span>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
@@ -121,15 +168,15 @@ export default function CartDrawer() {
           <div className="cart-drawer-footer">
             <div className="cart-summary-row">
               <span>Subtotal</span>
-              <span>S/ {state.subtotal.toFixed(2)}</span>
+              <span>{formatPEN(state.subtotal)}</span>
             </div>
             <div className="cart-summary-row">
               <span>Delivery</span>
-              <span>S/ {deliveryFee.toFixed(2)}</span>
+              <span>{formatPEN(deliveryFee)}</span>
             </div>
             <div className="cart-summary-total">
               <span>Total</span>
-              <span style={{ color: 'var(--brand-primary)' }}>S/ {total.toFixed(2)}</span>
+              <span style={{ color: 'var(--brand-primary)' }}>{formatPEN(total)}</span>
             </div>
             <button
               className="btn btn-primary w-full btn-lg"

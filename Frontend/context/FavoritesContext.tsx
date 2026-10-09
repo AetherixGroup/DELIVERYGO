@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useReducer, useCallback } from 'react'
+import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react'
 
 interface FavoritesState {
   productIds: Set<string>
@@ -10,10 +10,13 @@ type FavoritesAction =
   | { type: 'TOGGLE'; payload: string }
   | { type: 'ADD'; payload: string }
   | { type: 'REMOVE'; payload: string }
+  | { type: 'LOAD'; payload: string[] }
 
 function favReducer(state: FavoritesState, action: FavoritesAction): FavoritesState {
   const next = new Set(state.productIds)
   switch (action.type) {
+    case 'LOAD':
+      return { productIds: new Set(action.payload) }
     case 'TOGGLE':
       next.has(action.payload) ? next.delete(action.payload) : next.add(action.payload)
       return { productIds: next }
@@ -35,9 +38,32 @@ interface FavoritesContextValue {
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null)
+const FAV_STORAGE_KEY = 'deliverygo_favs_v1'
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(favReducer, { productIds: new Set<string>() })
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(FAV_STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) {
+          dispatch({ type: 'LOAD', payload: parsed })
+        }
+      }
+    } catch {
+      // Ignore errors reading local storage
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(Array.from(state.productIds)))
+    } catch {
+      // Ignore errors writing local storage
+    }
+  }, [state.productIds])
 
   const isFavorite = useCallback((id: string) => state.productIds.has(id), [state.productIds])
   const toggle = useCallback((id: string) => dispatch({ type: 'TOGGLE', payload: id }), [])

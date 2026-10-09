@@ -1,44 +1,93 @@
 'use client'
 
+import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Business } from '@/types'
-import { Star, Clock, Truck, ChevronRight } from 'lucide-react'
+import { Star, Clock, Truck, ChevronRight, Store } from 'lucide-react'
+import { formatPEN, getAssetPath } from '@/lib/utils'
 
 interface Props {
   business: Business
 }
 
 export default function BusinessCard({ business }: Props) {
+  const [logoError, setLogoError] = useState(false)
+  const [coverError, setCoverError] = useState(false)
+
+  const coverSrc = getAssetPath(business.coverImage)
+  const logoSrc = getAssetPath(business.logo)
+
   return (
     <Link href={`/businesses/${business.slug}`} className="business-card" aria-label={`Ver ${business.name}`}>
       {/* Cover */}
-      <div className="business-card-cover">
-        <Image
-          src={business.coverImage}
-          alt={`${business.name} - portada`}
-          fill
-          style={{ objectFit: 'cover' }}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        />
+      <div className="business-card-cover" style={{ position: 'relative', overflow: 'hidden', aspectRatio: '16/9' }}>
+        {coverError ? (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'var(--bg-surface-3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-muted)',
+            }}
+          >
+            <Store size={32} />
+          </div>
+        ) : (
+          <Image
+            src={coverSrc}
+            alt={`${business.name} - portada`}
+            fill
+            style={{ objectFit: 'cover' }}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            onError={() => setCoverError(true)}
+          />
+        )}
         <div className="business-card-cover-gradient" />
 
         {/* Logo */}
-        <div className="business-card-logo-wrap">
-          <Image
-            src={business.logo}
-            alt={`Logo ${business.name}`}
-            fill
-            style={{ objectFit: 'cover' }}
-          />
+        <div className="business-card-logo-wrap" style={{ position: 'absolute', overflow: 'hidden' }}>
+          {logoError ? (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'var(--bg-surface-2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--brand-primary)',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+              }}
+            >
+              {business.name.substring(0, 2).toUpperCase()}
+            </div>
+          ) : (
+            <Image
+              src={logoSrc}
+              alt={`Logo ${business.name}`}
+              fill
+              style={{ objectFit: 'cover' }}
+              onError={() => setLogoError(true)}
+            />
+          )}
         </div>
 
         {/* Featured badge */}
         {business.featured && (
-          <span className="badge badge-brand" style={{
-            position: 'absolute', top: 10, right: 10,
-            fontSize: '0.65rem',
-          }}>
+          <span
+            className="badge badge-brand"
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              fontSize: '0.65rem',
+            }}
+          >
             ⚡ Destacado
           </span>
         )}
@@ -77,7 +126,7 @@ export default function BusinessCard({ business }: Props) {
             {business.deliveryFee === 0 ? (
               <span style={{ color: 'var(--brand-primary)', fontWeight: 600 }}>Gratis</span>
             ) : (
-              `S/ ${business.deliveryFee.toFixed(2)}`
+              formatPEN(business.deliveryFee)
             )}
           </span>
         </div>
@@ -85,17 +134,25 @@ export default function BusinessCard({ business }: Props) {
         {/* Tags */}
         <div className="business-card-tags">
           {business.tags.slice(0, 3).map(tag => (
-            <span key={tag} className="badge badge-neutral">{tag}</span>
+            <span key={tag} className="badge badge-neutral">
+              {tag}
+            </span>
           ))}
         </div>
 
         {/* CTA */}
-        <div style={{
-          marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          paddingTop: 10, borderTop: '1px solid var(--border-medium)',
-        }}>
+        <div
+          style={{
+            marginTop: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: 10,
+            borderTop: '1px solid var(--border-medium)',
+          }}
+        >
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Mín. S/ {business.minimumOrder}
+            Mín. {formatPEN(business.minimumOrder)}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--brand-primary)', fontWeight: 600, fontSize: '0.8rem' }}>
             Ver tienda <ChevronRight size={14} />

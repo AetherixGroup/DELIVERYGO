@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { CartProvider } from '@/context/CartContext'
 import { FavoritesProvider } from '@/context/FavoritesContext'
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
 import CartDrawer from '@/components/marketplace/CartSummary'
 
 export const metadata: Metadata = {
@@ -24,7 +26,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <FavoritesProvider>
           <CartProvider>
-            {children}
+            <Navbar />
+            <main id="main-content">
+              {children}
+            </main>
+            <Footer />
             <CartDrawer />
           </CartProvider>
         </FavoritesProvider>
