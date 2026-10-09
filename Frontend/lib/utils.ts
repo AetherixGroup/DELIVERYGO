@@ -23,6 +23,8 @@ export function formatPEN(amount: number): string {
  * Normalizes asset image paths to prevent double basePath issues
  * and handle fallback default images cleanly.
  */
+const BASE_PATH = process.env.__NEXT_ROUTER_BASEPATH || ''
+
 export function getAssetPath(path?: string, fallback: string = '/images/placeholder.png'): string {
   if (!path || typeof path !== 'string' || path.trim() === '') {
     return fallback
@@ -30,7 +32,7 @@ export function getAssetPath(path?: string, fallback: string = '/images/placehol
 
   let cleanPath = path.trim()
 
-  // Remove leading './DELIVERYGO' or '/DELIVERYGO' if present
+  // Normalize any legacy/duplicated basePath prefix so it is never added twice
   cleanPath = cleanPath.replace(/^(\.|\/)?DELIVERYGO/i, '')
 
   // Ensure leading slash
@@ -38,8 +40,13 @@ export function getAssetPath(path?: string, fallback: string = '/images/placehol
     cleanPath = '/' + cleanPath
   }
 
-  // Next.js Image component handles basePath automatically when output: 'export' and basePath is set in next.config.mjs.
-  // For standard <img> tags or CSS backgrounds, if basePath prefix is needed, it can be prefixed.
+  // next/image with `unoptimized` (required by `output: 'export'`) returns the
+  // `src` verbatim and does NOT prepend the Next.js basePath, so files served
+  // from `public/` must be prefixed manually to avoid 404s on subpath deploys.
+  if (BASE_PATH && !cleanPath.startsWith(BASE_PATH + '/')) {
+    cleanPath = BASE_PATH + cleanPath
+  }
+
   return cleanPath
 }
 

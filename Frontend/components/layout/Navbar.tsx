@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -58,7 +58,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="navbar-logo" aria-label="DeliveryGood - Inicio">
             <Image
-              src={getAssetPath('/images/logo de preaft.jpeg')}
+              src={getAssetPath('/images/LOGO DELIVERYGO.jpeg')}
               alt="DeliveryGood"
               width={44}
               height={44}

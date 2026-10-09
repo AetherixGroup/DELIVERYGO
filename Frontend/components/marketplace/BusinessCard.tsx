@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function BusinessCard({ business }: Props) {
-  const [logoError, setLogoError] = useState(false)
+  const [logoError, setLogoError] = useState(!business.logo)
   const [coverError, setCoverError] = useState(false)
 
   const coverSrc = getAssetPath(business.coverImage)

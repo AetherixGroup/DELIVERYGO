@@ -21,7 +21,7 @@ export default function BusinessDetailClient({
 
   const productCategories = ['Todos', ...Array.from(new Set(bizProducts.map(p => p.category)))]
   const [activeCat, setActiveCat] = useState('Todos')
-  const [logoError, setLogoError] = useState(false)
+  const [logoError, setLogoError] = useState(!business?.logo)
   const [coverError, setCoverError] = useState(false)
 
   const filtered = activeCat === 'Todos'

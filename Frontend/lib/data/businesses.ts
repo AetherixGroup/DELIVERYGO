@@ -10,7 +10,7 @@ export const businesses: Business[] = [
     description:
       'Pizzería artesanal con más de 5 años en Santa Clara. Pizzas familiares, medianas y personales al horno. Ingredientes frescos, masa artesanal y la famosa salsa mediterránea que nos distingue.',
     category: 'pizzeria',
-    logo: '/images/logo de pizzeria DLU.png',
+    logo: '/images/logo de pizzeria D´LU.png',
     coverImage: '/images/2 pizzas familiares americana y hawaina.jpeg',
     bannerImages: [
       '/images/1 pizza familiar - 1 pizza mediana (americana,hawaina).jpeg',
